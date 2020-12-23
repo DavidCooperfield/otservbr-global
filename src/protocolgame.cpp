@@ -569,7 +569,8 @@ void ProtocolGame::parsePacket(NetworkMessage& msg)
 		case 0xCB: parseBrowseField(msg); break;
 		case 0xCC: parseSeekInContainer(msg); break;
     case 0xCD: parseInspectionObject(msg); break;
-		case 0xD2: addGameTask(&Game::playerRequestOutfit, player->getID()); break;
+    case 0xD1: /* request market statistics */; break;
+    case 0xD2: addGameTask(&Game::playerRequestOutfit, player->getID()); break;
 		//g_dispatcher.addTask(createTask(std::bind(&Modules::executeOnRecvbyte, g_modules, player, msg, recvbyte)));
 		case 0xD3: g_dispatcher.addTask(createTask(std::bind(&ProtocolGame::parseSetOutfit, this, msg))); break;
 		case 0xD4: parseToggleMount(msg); break;
@@ -3544,6 +3545,48 @@ void ProtocolGame::sendMarketDetail(uint16_t itemId)
 	writeToOutputBuffer(msg);
 }
 
+void ProtocolGame::sendMarketStatistics()
+{
+  // Statistics are updated on server startup so it does make sense to have them cached
+
+  static NetworkMessage msg;
+  if (msg.getLength() == 0) {
+    std::map<uint16_t, uint32_t> items;
+
+    auto& purchaseStatistics = IOMarket::getInstance().getPurchaseStatistics();
+    auto& saleStatistics = IOMarket::getInstance().getSaleStatistics();
+
+#define cacheStatistics(container, container2)														\
+			do {																							\
+				for (auto& it : container) {																\
+					uint16_t itemId = it.first;																\
+					MarketStatistics* statistics = &it.second;												\
+					uint32_t avgPrice = (statistics->totalPrice / statistics->numTransactions);				\
+					uint32_t division = 0;																	\
+					auto cit = container2.find(itemId);														\
+					if (cit != container2.end()) {															\
+						statistics = &cit->second;															\
+						avgPrice += (statistics->totalPrice / statistics->numTransactions);					\
+						division = 1;																		\
+					}																						\
+					items[itemId] = (avgPrice >> division);													\
+				}																							\
+			} while(0)
+
+    cacheStatistics(purchaseStatistics, saleStatistics);
+    cacheStatistics(saleStatistics, purchaseStatistics);
+#undef cacheStatistics
+
+    msg.addByte(0xCD);
+    msg.add<uint16_t>(items.size());
+    for (const auto& it : items) {
+      msg.addItemId(it.first);
+      msg.add<uint32_t>(it.second);
+    }
+  }
+  writeToOutputBuffer(msg);
+}
+
 void ProtocolGame::sendTradeItemRequest(const std::string& traderName, const Item* item, bool ack)
 {
 	NetworkMessage msg;
@@ -4183,7 +4226,8 @@ void ProtocolGame::sendAddCreature(const Creature* creature, const Position& pos
 
   	sendLootContainers();
   	sendBasicData();
-	initPreyData();
+    sendMarketStatistics();
+    initPreyData();
 
 	player->sendClientCheck();
 	player->sendGameNews();
