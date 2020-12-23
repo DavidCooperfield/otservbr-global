@@ -1160,9 +1160,39 @@ class Player final : public Creature, public Cylinder
 				client->sendChangeSpeed(creature, newSpeed);
 			}
 		}
-		void sendCreatureHealth(const Creature* creature) const {
+		void sendCreatureHealth(const Creature* creature, uint8_t healthPercent) const {
 			if (client) {
-				client->sendCreatureHealth(creature);
+				client->sendCreatureHealth(creature, healthPercent);
+			}
+		}
+		void sendPartyCreatureUpdate(const Creature* creature) const {
+			if (client) {
+				client->sendPartyCreatureUpdate(creature);
+			}
+		}
+		void sendPartyCreatureShield(const Creature* creature) const {
+			if (client) {
+				client->sendPartyCreatureShield(creature);
+			}
+		}
+		void sendPartyCreatureSkull(const Creature* creature) const {
+			if (client) {
+				client->sendPartyCreatureSkull(creature);
+			}
+		}
+		void sendPartyCreatureHealth(const Creature* creature, uint8_t healthPercent) const {
+			if (client) {
+				client->sendPartyCreatureHealth(creature, healthPercent);
+			}
+		}
+		void sendPartyPlayerMana(const Player* player, uint8_t manaPercent) const {
+			if (client) {
+				client->sendPartyPlayerMana(player, manaPercent);
+			}
+		}
+		void sendPartyCreatureShowStatus(const Creature* creature, bool showStatus) const {
+			if (client) {
+				client->sendPartyCreatureShowStatus(creature, showStatus);
 			}
 		}
 		void sendDistanceShoot(const Position& from, const Position& to, unsigned char type) const {
@@ -1855,7 +1885,7 @@ class Player final : public Creature, public Cylinder
 
 		std::vector<ShopInfo> shopItemList;
 
-		std::forward_list<Party*> invitePartyList;
+		std::vector<Party*> invitePartyList;
 		std::forward_list<uint32_t> modalWindows;
 		std::forward_list<std::string> learnedInstantSpellList;
 		std::forward_list<Condition*> storedConditionList; // TODO: This variable is only temporarily used when logging in, get rid of it somehow

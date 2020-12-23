@@ -748,7 +748,6 @@ Item* Creature::getCorpse(Creature*, Creature*)
 
 void Creature::changeHealth(int32_t healthChange, bool sendHealthChange/* = true*/)
 {
-	int32_t oldHealth = health;
 
 	if (healthChange > 0) {
 		health += std::min<int32_t>(healthChange, getMaxHealth() - health);
@@ -756,7 +755,7 @@ void Creature::changeHealth(int32_t healthChange, bool sendHealthChange/* = true
 		health = std::max<int32_t>(0, health + healthChange);
 	}
 
-	if (sendHealthChange && oldHealth != health) {
+	if (sendHealthChange) {
 		g_game.addCreatureHealth(this);
 	}
 	if (health <= 0) {

@@ -9380,6 +9380,7 @@ int LuaScriptInterface::luaPlayerSetMaxMana(lua_State* L)
 	if (player) {
 		player->manaMax = getNumber<int32_t>(L, 2);
 		player->mana = std::min<int32_t>(player->mana, player->manaMax);
+		g_game.addPlayerMana(player);
 		player->sendStats();
 		pushBoolean(L, true);
 	} else {
@@ -16576,8 +16577,7 @@ int32_t LuaScriptInterface::luaPartyCreate(lua_State* L)
 	Party* party = player->getParty();
 	if (!party) {
 		party = new Party(player);
-		g_game.updatePlayerShield(player);
-		player->sendCreatureSkull(player);
+		player->sendPlayerPartyIcons(player);
 		pushUserdata<Party>(L, party);
 		setMetatable(L, -1, "Party");
 	} else {

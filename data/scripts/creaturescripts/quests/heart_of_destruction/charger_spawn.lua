@@ -4,8 +4,8 @@ local function chargerSpawn(pos)
 	return true
 end
 
-local chargerSpawn = CreatureEvent("ChargerSpawn")
-function chargerSpawn.onDeath(creature)
+local ChargerSpawn = CreatureEvent("ChargerSpawn")
+function ChargerSpawn.onDeath(creature)
 	local positions = {
 		{x = 32151, y = 31356, z = 14},
 		{x = 32154, y = 31353, z = 14},
@@ -20,9 +20,9 @@ function chargerSpawn.onDeath(creature)
 	}
 
 	local pos = positions[math.random(1, #positions)]
-	addEvent(chargerSpawn, 6000, pos)
+	addEvent(ChargerSpawn, 6000, pos)
 	spawningCharge = true
 	return true
 end
 
-chargerSpawn:register()
+ChargerSpawn:register()

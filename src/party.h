@@ -80,6 +80,12 @@ class Party
 		void updatePlayerTicks(Player* player, uint32_t points);
 		void clearPlayerPoints(Player* player);
 
+		void showPlayerStatus(Player* player, Player* member, bool showStatus);
+		void updatePlayerStatus(Player* player);
+		void updatePlayerStatus(Player* player, const Position& oldPos, const Position& newPos);
+		void updatePlayerHealth(const Player* player, const Creature* target, uint8_t healthPercent);
+		void updatePlayerMana(const Player* player, uint8_t manaPercent);
+
 	private:
 		bool canEnableSharedExperience();
 
