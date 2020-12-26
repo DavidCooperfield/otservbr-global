@@ -1119,6 +1119,13 @@ void LuaScriptInterface::registerFunctions()
 	registerEnum(account::ACCOUNT_TYPE_GAMEMASTER)
 	registerEnum(account::ACCOUNT_TYPE_GOD)
 
+	registerEnum(account::GROUP_TYPE_NORMAL)
+	registerEnum(account::GROUP_TYPE_TUTOR)
+	registerEnum(account::GROUP_TYPE_SENIORTUTOR)
+	registerEnum(account::GROUP_TYPE_GAMEMASTER)
+	registerEnum(account::GROUP_TYPE_COMMUNITYMANAGER)
+	registerEnum(account::GROUP_TYPE_GOD)
+
 	registerEnum(BUG_CATEGORY_MAP)
 	registerEnum(BUG_CATEGORY_TYPO)
 	registerEnum(BUG_CATEGORY_TECHNICAL)
@@ -2510,6 +2517,7 @@ void LuaScriptInterface::registerFunctions()
 	registerMethod("Player", "getRewardList", LuaScriptInterface::luaPlayerGetRewardList);
 
 	registerMethod("Player", "sendInventory", LuaScriptInterface::luaPlayerSendInventory);
+	registerMethod("Player", "sendLootStats", LuaScriptInterface::luaPlayerSendLootStats);
 	registerMethod("Player", "updateSupplyTracker", LuaScriptInterface::luaPlayerUpdateSupplyTracker);
 	registerMethod("Player", "updateKillTracker", LuaScriptInterface::luaPlayerUpdateKillTracker);
 
@@ -2640,6 +2648,8 @@ void LuaScriptInterface::registerFunctions()
 	registerMethod("Player", "addFamiliar", LuaScriptInterface::luaPlayerAddFamiliar);
 	registerMethod("Player", "removeFamiliar", LuaScriptInterface::luaPlayerRemoveFamiliar);
 	registerMethod("Player", "hasFamiliar", LuaScriptInterface::luaPlayerHasFamiliar);
+	registerMethod("Player", "setFamiliarLooktype", LuaScriptInterface::luaPlayerSetFamiliarLooktype);
+	registerMethod("Player", "getFamiliarLooktype", LuaScriptInterface::luaPlayerGetFamiliarLooktype);
 
 	registerMethod("Player", "getPremiumDays", LuaScriptInterface::luaPlayerGetPremiumDays);
 	registerMethod("Player", "addPremiumDays", LuaScriptInterface::luaPlayerAddPremiumDays);
@@ -4031,6 +4041,27 @@ int LuaScriptInterface::luaPlayerSendInventory(lua_State* L)
 	}
 
  	player->sendInventoryClientIds();
+	pushBoolean(L, true);
+
+ 	return 1;
+}
+
+int LuaScriptInterface::luaPlayerSendLootStats(lua_State* L)
+{
+	// player:sendLootStats(item)
+	Player* player = getUserdata<Player>(L, 1);
+	if (!player) {
+		lua_pushnil(L);
+		return 1;
+	}
+
+ 	Item* item = getUserdata<Item>(L, 2);
+	if (!item) {
+		lua_pushnil(L);
+		return 1;
+	}
+
+ 	player->sendLootStats(item);
 	pushBoolean(L, true);
 
  	return 1;
@@ -10779,6 +10810,29 @@ int LuaScriptInterface::luaPlayerHasFamiliar(lua_State* L) {
 	if (player) {
 		uint16_t lookType = getNumber<uint16_t>(L, 2);
 		pushBoolean(L, player->canFamiliar(lookType));
+	} else {
+		lua_pushnil(L);
+	}
+	return 1;
+}
+
+int LuaScriptInterface::luaPlayerSetFamiliarLooktype(lua_State* L) {
+	// player:setFamiliarLooktype(lookType)
+	Player* player = getUserdata<Player>(L, 1);
+	if (player) {
+		player->setFamiliarLooktype(getNumber<uint16_t>(L, 2));
+		pushBoolean(L, true);
+	} else {
+		lua_pushnil(L);
+	}
+	return 1;
+}
+
+int LuaScriptInterface::luaPlayerGetFamiliarLooktype(lua_State* L) {
+	// player:getFamiliarLooktype()
+	Player* player = getUserdata<Player>(L, 1);
+	if (player) {
+		lua_pushnumber(L, player->defaultOutfit.lookFamiliarsType);
 	} else {
 		lua_pushnil(L);
 	}
